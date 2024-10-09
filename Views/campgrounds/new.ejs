@@ -1,0 +1,51 @@
+<% layout('./layouts/boilerplate') %>
+<div class="row">
+    <h1 class="text-center">New Campground</h1>
+    <div class="col-6 offset-3">
+        <form action="/campgrounds" method ='POST' novalidate class="validated-form">
+            <div class="mb-3">
+                <label class="form-label" for="title">Title</label>
+                <input class="form-control" type="text" id="title" placeholder="Enter new campground " 
+                name="campground[title]" required>
+                <!-- The campground[title] is just telling the server to store the data passed in for title to an object called campground. So you would get {'campground : {'title':'title_you_entered'}
+                                }' -->
+                 <div class="valid-feedback">It is green now</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-control" for="location">Location</label>
+                <input class="form-control" type="text" id="location" placeholder="Enter new location" name="campground[location]" required>
+                <!-- Same as above but now as we have a second input for the form, the body will contain {'campground : {'title':'title_you_entered',
+                    'location' : 'location_you_entered'}
+                            }' -->
+                <div class="valid-feedback">It is green now</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-control" for="image">Image Url</label>
+                <input class="form-control" type="text" id="image" placeholder="Enter new location" name="campground[image]" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="price">Campground Price</label>
+                <div class="input-group">
+                    <span class="input-group-text" id="price-label">£</span>
+                    <input type="text" class="form-control" id="price" placeholder="0.00" aria-label="price"
+                        aria-describedby="price-label" name="campground[price]" required>
+                    <div class="valid-feedback">It is green now</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-control" for="description">Camp Description</label>
+                <textarea class="form-control" type="text" id="description" placeholder="Enter new location" name="campground[description]"required></textarea> 
+                <div class="valid-feedback">It is green now</div>
+            </div>
+    
+            <button class="btn btn-success mb-3">Add Campground</button>
+        
+            <footer>
+                <a href="\campgrounds">All Campgrounds</a>
+            </footer>
+        </form>
+    </div>
+</div>
+
+
+
