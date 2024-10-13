@@ -51,7 +51,7 @@ const validateCampground = (req,res,next) => {
 const validateReview = (req, res, next) => {
     const {error} = reviewSchema.validate(req.body)
     // console.log(error) 
-    console.log(req.body)  
+    // console.log(req.body)  
     if(error){
         const msg = error.details.map(element => element.message).join(',')
         throw new ExpressError(msg, 400)
