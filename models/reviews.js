@@ -4,7 +4,7 @@ const schema = mongoose.Schema
 const reviewSchema = new schema({
     body: String,
     rating:{ 
-        type: Number,
+        type: Number
         }
 })    
 
