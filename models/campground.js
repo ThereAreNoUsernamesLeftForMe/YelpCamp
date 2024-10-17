@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const review = require('./reviews')
 const schema = mongoose.Schema
 
 const CampgroundsSchema = new schema ({
@@ -13,6 +14,18 @@ const CampgroundsSchema = new schema ({
             ref: 'Review'
         }
     ]
+})
+
+// Delete middleware
+// .post lets you pass in the document(s) that were edidted/deleted into the callback you pass through as the second argument of .post
+CampgroundsSchema.post('findOneAndDelete', async function(doc){
+    if(doc){
+        await review.deleteMany({
+            _id: {
+                $in: doc.reviews
+            }
+        })
+    }
 })
 
 module.exports = mongoose.model('Campground', CampgroundsSchema)

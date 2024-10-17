@@ -4,13 +4,13 @@ const app = express()
 const path = require('path')
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate')
-const {campgroundSchema, reviewSchema} = require('./joiSchemas')
 const mongoose = require('mongoose')
-const catchAsync = require('./utils/catchAsync')
 const ExpressError = require('./utils/ExpressErrors')
-const Campground = require('./models/campground');
-const Review = require('./models/reviews');
-const { title } = require('process');
+
+
+// connecting routers 
+const campgrounds = require('./routes/campgrounds')
+const reviews = require('./routes/reviews')
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp')
 
@@ -26,7 +26,7 @@ app.set('view engine','ejs')
 app.set('views', path.join(__dirname,'views'))
 
 // Telling express to parse the body of requests (So req.body)
-app.use(express.urlencoded({ extended : true}))
+app.use(express.urlencoded({ extended: true }));
 
 // Telling express to allow forms to submit PATCH, DELETE and PUT requests
 app.use(methodOverride('_method'))
@@ -37,84 +37,16 @@ app.use(methodOverride('_method'))
 // Telling express to use ejsMate as the engine we want to use to run ejs, insteasd of the default one in express
 app.engine('ejs', ejsMate)
 
-// Custom campground input data validator which we made with the help of joi
-const validateCampground = (req,res,next) => { 
-    const {error}= campgroundSchema.validate(req.body)
-    if(error){
-        const msg = error.details.map(element => element.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else{
-        next()
-    }
-}
 
-const validateReview = (req, res, next) => {
-    const {error} = reviewSchema.validate(req.body)
-    // console.log(error) 
-    // console.log(req.body)  
-    if(error){
-        const msg = error.details.map(element => element.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else{
-        next()
-    }
-    
-}
 
 // Routes
+app.use('/campgrounds', campgrounds)
+app.use('/campgrounds/:campid/reviews', reviews)
+
 app.get('/', (req,res) => {
     res.render('home')
 })
 
-app.get('/campgrounds', catchAsync(async (req,res) => {
-    const campgrounds = await Campground.find({})
-    res.render('campgrounds/index',{ campgrounds}) 
-}))
-
-app.get('/campgrounds/new' , (req,res) => {
-    res.render('campgrounds/new')
-})
-
-app.post('/campgrounds', validateCampground , catchAsync(async (req, res, next) => {
-
-    const campground = new Campground(req.body.campground)
-    await campground.save()
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-
-app.get('/campgrounds/:id', catchAsync(async (req,res, next) => {
-    // console.log(`The id is :${req.params.id}`
-    const campground = await Campground.findById(req.params.id).populate('reviews')
-    res.render('campgrounds/show',{campground})
-}))
-
-app.get('/campgrounds/:id/edit', catchAsync(async (req,res, next) => {
-    const campground = await Campground.findById(req.params.id)
-    res.render('campgrounds/edit',{campground})
-}))
-
-
-app.patch('/campgrounds/:id', validateCampground,  catchAsync(async (req,res, next) => {
-    const { id } = req.params
-    const campground = await Campground.findByIdAndUpdate(id,{...req.body.campground})
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-
-app.delete('/campgrounds/:id', catchAsync(async (req, res, next) => {
-    const { id } = req.params
-    await Campground.findByIdAndDelete(id)
-    res.redirect('/campgrounds')
-}))
-
-
-app.post('/campgrounds/:id/reviews',validateReview, catchAsync(async (req,res) => {
-    const campground = await Campground.findById(req.params.id)
-    const review = new Review(req.body.review)
-    campground.reviews.push(review)
-    await review.save()
-    await campground.save()
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
 
 // .all hits every path user types int to the url. This is why it is at the end off all route handelers and above the custom error handeler we made. If a user enters a route that doesn't exist, then the req will bypass all our above route handelers and then hit this one. Then we throw a custom error and pass that to our error handeler to send 'page not found' and a 404 status, instead of the default values we defined in the error handeler.
 
