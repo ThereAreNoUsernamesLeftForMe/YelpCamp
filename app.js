@@ -6,6 +6,8 @@ const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate')
 const mongoose = require('mongoose')
 const ExpressError = require('./utils/ExpressErrors')
+const session = require('express-session')
+const flash = require('connect-flash')
 
 
 // connecting routers 
@@ -33,14 +35,35 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'))
 
 // Telling express that we want whatever is in the 'public' directory to be able to be served to the clients browser
-app.use(express.static('public'))
+app.use(express.static(path.join(__dirname,'public')))
 
+// Creating sessions
+const sessionsConfig = {
+    secret : 'thisshouldbeabettersecrettbh',
+    resave : false,
+    saveUninitialized : true,
+    cookie : {
+        httpOnly : true,
+        expires : Date.now() + 1000 * 60 * 60 * 24 * 7
+    }
+}
+app.use(session(sessionsConfig))
 
+// Creating option to create temporary messages
+app.use(flash())
 
 // Telling express to use ejsMate as the engine we want to use to run ejs, insteasd of the default one in express
 app.engine('ejs', ejsMate)
 
 
+
+// Flash middleware to allow templates to have access falsh messages we create. If we did not create a flash message for a specific req, then all the properites we define in the middleware will just be empty when passed through to the associated template. 
+// For an example where we did make a message, see routes/campgrounds.js post request
+app.use((req,res,next) => {
+    res.locals.success = req.flash('success')
+    res.locals.error = req.flash('error')
+    next()
+})
 
 // Routes
 app.use('/campgrounds', campgrounds)
