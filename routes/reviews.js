@@ -23,7 +23,7 @@ const validateReview = (req, res, next) => {
 
 // Routes
 router.post('/',validateReview, catchAsync(async (req,res) => {
-    const campground = await Campground.findById(req.params.campid)
+    const campground = await Campground.findById(req.params.campId)
     const review = new Review(req.body.review)
     campground.reviews.push(review)
     await review.save()
@@ -32,11 +32,7 @@ router.post('/',validateReview, catchAsync(async (req,res) => {
 }))
 
 router.delete('/:reviewId', catchAsync(async(req,res) => {
-    console.log(`This is from line 35 + 36 of routes/reviews.js:`)
-    console.log(req.params)
     const { campId, reviewId} = req.params
-    console.log(`This is from line 38 + 39 of routes/reviews.js. I am loging campid:`)
-    console.log(campId)
     // Using pull operator to remove the associated review from our campground document 
     await Campground.findByIdAndUpdate(campId, {$pull: {reviews: reviewId}})
     await Review.findByIdAndDelete(reviewId)
