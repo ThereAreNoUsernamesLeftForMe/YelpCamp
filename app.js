@@ -23,6 +23,7 @@ db.once('open', () => {
 
 // Setting up ejs
 app.set('view engine','ejs')
+// Setting the absolute path to the 'views' directory, so regardless where I start my server from, express will be able to find 'views' and serve it as intended
 app.set('views', path.join(__dirname,'views'))
 
 // Telling express to parse the body of requests (So req.body)
@@ -31,6 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 // Telling express to allow forms to submit PATCH, DELETE and PUT requests
 app.use(methodOverride('_method'))
 
+// Telling express that we want whatever is in the 'public' directory to be able to be served to the clients browser
+app.use(express.static('public'))
 
 
 
@@ -41,7 +44,7 @@ app.engine('ejs', ejsMate)
 
 // Routes
 app.use('/campgrounds', campgrounds)
-app.use('/campgrounds/:campid/reviews', reviews)
+app.use('/campgrounds/:campId/reviews', reviews)
 
 app.get('/', (req,res) => {
     res.render('home')
