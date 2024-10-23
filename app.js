@@ -1,4 +1,4 @@
-//Requring and connecting
+//Requring
 const express = require('express')
 const app = express()   
 const path = require('path')
@@ -8,11 +8,15 @@ const mongoose = require('mongoose')
 const ExpressError = require('./utils/ExpressErrors')
 const session = require('express-session')
 const flash = require('connect-flash')
+const passport = require('passport')
+const localStrategy = require('passport-local')
+const User = require('./models/user')
 
 
-// connecting routers 
-const campgrounds = require('./routes/campgrounds')
-const reviews = require('./routes/reviews')
+// connecting 
+const campgroundRoutes = require('./routes/campgrounds')
+const reviewRoutes = require('./routes/reviews')
+const userRoutes = require('./routes/users')
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp')
 
@@ -23,8 +27,10 @@ db.once('open', () => {
 })
 
 
-// Setting up ejs
+// Setting up 
+// Doing this makes JS assume that any files you are going to serve in the views folder will be ejs files (I think). This is why you don't need to add the file type when rendering ejs files.
 app.set('view engine','ejs')
+
 // Setting the absolute path to the 'views' directory, so regardless where I start my server from, express will be able to find 'views' and serve it as intended
 app.set('views', path.join(__dirname,'views'))
 
@@ -52,22 +58,33 @@ app.use(session(sessionsConfig))
 // Creating option to create temporary messages
 app.use(flash())
 
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new localStrategy(User.authenticate()))
+
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
+
 // Telling express to use ejsMate as the engine we want to use to run ejs, insteasd of the default one in express
 app.engine('ejs', ejsMate)
 
 
 
-// Flash middleware to allow templates to have access falsh messages we create. If we did not create a flash message for a specific req, then all the properites we define in the middleware will just be empty when passed through to the associated template. 
-// For an example where we did make a message, see routes/campgrounds.js post request
+// Making middleware to allow all ejs templates access to whatever we define in the locals object. All ejs templates will always have acess to the res.locals, this is the optional second paramater when we render an template (The one with {}).
+// If we didn't create a flash message in a route, then the flash objects will just be empty, so no issues of messages poping up when they shouldn't.
+// For an example where we did make a message, see routes/campgrounds.js post request.
 app.use((req,res,next) => {
+    // If nobody is signed in, then req.user is just gonna be undefined. Which we use to determine if we display the 'Login' or 'Logout' options in our navbar template.
+    res.locals.currentUser = req.user
     res.locals.success = req.flash('success')
     res.locals.error = req.flash('error')
     next()
 })
 
 // Routes
-app.use('/campgrounds', campgrounds)
-app.use('/campgrounds/:campId/reviews', reviews)
+app.use('/campgrounds', campgroundRoutes)
+app.use('/campgrounds/:campId/reviews', reviewRoutes)
+app.use('/',userRoutes)
 
 app.get('/', (req,res) => {
     res.render('home')
