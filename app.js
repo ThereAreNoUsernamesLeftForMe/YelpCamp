@@ -71,8 +71,8 @@ app.engine('ejs', ejsMate)
 
 
 // Making middleware to allow all ejs templates access to whatever we define in the locals object. All ejs templates will always have acess to the res.locals, this is the optional second paramater when we render an template (The one with {}).
+// From the course 'In Express.js, res.locals is an object that provides a way to pass data through the application during the request-response cycle. It allows you to store variables that can be accessed by your templates and other middleware functions.'
 // If we didn't create a flash message in a route, then the flash objects will just be empty, so no issues of messages poping up when they shouldn't.
-// For an example where we did make a message, see routes/campgrounds.js post request.
 app.use((req,res,next) => {
     // If nobody is signed in, then req.user is just gonna be undefined. Which we use to determine if we display the 'Login' or 'Logout' options in our navbar template.
     res.locals.currentUser = req.user

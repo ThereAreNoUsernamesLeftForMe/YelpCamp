@@ -23,6 +23,8 @@ const seedDB = async() => {
         const rand1000 = Math.floor(Math.random() * 1000)
         const price = Math.floor(Math.random() * 20) + 20
         const camp = new Campground({
+            // Asigning the user with username 'abc' as the author of all the campgrounds that are on the website initially. So when we reseed the db there will not be an issue with no authors for these campgrounds.
+            author: '67181e83c17d0475024f8072',
             location : `${cities[rand1000].city}, ${cities[rand1000].state}`,
             title : `${sample(descriptors)} ${sample(places)}`,
             image: `https://picsum.photos/400?random=${Math.random()}`,
