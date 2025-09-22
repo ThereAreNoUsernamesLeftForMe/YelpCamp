@@ -5,6 +5,11 @@ const reviewSchema = new schema({
     body: String,
     rating:{ 
         type: Number
+        },
+    author: 
+        {
+            type: schema.Types.ObjectId,
+            ref: 'User'
         }
 })    
 
